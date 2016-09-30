@@ -1,31 +1,46 @@
-##Fotoautomat mit Raspberry Pi
-#Make 1/15
-#
-
 import RPi.GPIO as IO
 import time
 import os
 import picamera
-from os.path import basename, splitext
+import os.path
 import sys
 import getopt
-import ftplib
 import PIL.Image
 import PIL.ImageEnhance
 from PIL import Image
 import pygame
 
 
-
 countdownList = ['3_', '2_', '1_']
+filename = 'count.txt'
+
+# create counter file if doesn't exist
+if not os.path.isfile(filename):
+    f = open(filename, 'w')
+    f.write('0')
+    f.close()
+    
 
 
+# increment counter file and return new value
+def getNextImageId():
+    global filename
+    f = open(filename, 'r+')
+    current = int(f.read())
+    next = current + 1;
+
+    f.seek(0)
+    f.write(str(next))
+    f.truncate()
+    
+    return str(next);
+
+
+
+# make a picture
 def shot():
     ## define filename for output image
-    timestamp = time.ctime(time.time())
-    timestamp = timestamp.replace(" ", "_")
-    timestamp = timestamp.replace(":", "")
-    destFile = "./selfies/selfie-" + timestamp + ".jpg"
+    destFile = "./selfies/selfie-" + getNextImageId() + ".jpg"
    
     ## show countdown overlays
     for i in countdownList:
@@ -104,7 +119,7 @@ piCam.preview_fullscreen = True
 piCam.resolution = (1024,768)
 piCam.hflip = False
 piCam.vflip = True
-piCam.annotate_text_size=160
+#piCam.annotate_text_size=160
 #piCam.annotate_background=picamera.Color('red')
 piCam.start_preview(fullscreen=True)
 piCam.iso = 0
